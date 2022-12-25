@@ -2,12 +2,10 @@ package com.code.jamie.mpesa;
 
 import com.google.gson.JsonObject;
 import netscape.javascript.JSObject;
-import okhttp3.OkHttp;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 import org.json.JSONObject;
 
+import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.util.Base64;
 
@@ -47,7 +45,7 @@ public class Implementation implements Service{
         String encoded = Base64.getEncoder().encodeToString(bytes);
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
-                .url(url+"generate?grant_type=client_credentials")
+                .url(url+"oauth/v1/generate?grant_type=client_credentials")
                 .get()
                 .addHeader("authorization","Basic "+encoded)
                 .addHeader("cache-control","no-cache")
@@ -59,22 +57,84 @@ public class Implementation implements Service{
     }
 
     @Override
-    public String C2B(String shortCode, String commandId, String amount, String phoneNumber, String billRefNum) throws IOException {
-        return null;
+    public String C2B(String shortCode, String commandId, String amount, String phoneNumber, String billRefNum,String url) throws IOException {
+        JSONObject jsonObject = new JSONObject()
+                .put("shortCode",shortCode)
+                .put("CommandID",commandId)
+                .put("Amount",amount)
+                .put("Msisdn",phoneNumber)
+                .put("BillRefNumber",billRefNum);
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody requestBody = RequestBody.create(mediaType, String.valueOf(jsonObject));
+        Request request = new Request.Builder()
+                .url(url+"/c2b/v1/simulate")
+                .post(requestBody)
+                .addHeader("content-type", mediaType.type())
+                .addHeader("authorization","Bearer "+authenticate(url))
+                .addHeader("cache-control","no-cache")
+                .build();
+        Response response = client.newCall(request).execute();
+        return response.body().toString();
     }
 
     @Override
-    public String B2C(String initiatorName, String securityCreds, String commandId, String amount, String senderShortCode, String recipientPhone, String remarks, String queueTimeOutUrl, String resultUrl, String occasion) throws IOException {
-        return null;
+    public String B2C(String initiatorName, String securityCreds, String commandId, String amount, String senderShortCode, String recipientPhone, String remarks, String queueTimeOutUrl, String resultUrl, String occasion,String url) throws IOException {
+        JSONObject jsonObject = new JSONObject()
+                .put("InitiatorName",initiatorName)
+                .put("SecurityCredential",securityCreds)
+                .put("CommandID",commandId)
+                .put("Amount",amount)
+                .put("PartyA",senderShortCode)
+                .put("PartyB",recipientPhone)
+                .put("Remarks",remarks)
+                .put("QueueTimeOutURL",queueTimeOutUrl)
+                .put("ResultURL",resultUrl)
+                .put("Occassion",occasion);
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody requestBody = RequestBody.create(mediaType,jsonObject.toString());
+        Request request = new Request.Builder()
+                .url(url+"/b2c/v1/paymentrequest")
+                .post(requestBody)
+                .addHeader("content-type","application/json")
+                .addHeader("cache-control","no-cache")
+                .addHeader("authorization","Bearer "+authenticate(url))
+                .build();
+        Response response = client.newCall(request).execute();
+        return response.body().toString();
     }
 
     @Override
-    public String B2B(String initiatorName, String accRef, String secCreds, String commandId, String senderIdType, String receiverIdType, Double amount, String sender, String recipient, String remarks, String queueTimeOutUrl, String resultUrl, String occasion) throws IOException {
-        return null;
+    public String B2B(String initiatorName, String accRef, String secCreds, String commandId, String senderIdType, String receiverIdType, Double amount, String sender, String recipient, String remarks, String queueTimeOutUrl, String resultUrl, String url) throws IOException {
+        JSONObject jsonObject = new JSONObject()
+                .put("InitiatorName",initiatorName)
+                .put("SecurityCredential",secCreds)
+                .put("CommandID",commandId)
+                .put("SenderIdentificationType",senderIdType)
+                .put("RecieverIdentificationType",receiverIdType)
+                .put("Amount",amount)
+                .put("PartyA",sender)
+                .put("PartyB",recipient)
+                .put("Remarks",remarks)
+                .put("QueueTimeOutURL",queueTimeOutUrl)
+                .put("ResultURL",resultUrl);
+        OkHttpClient client = new OkHttpClient();
+        MediaType mediaType = MediaType.parse("application/json");
+        RequestBody requestBody = RequestBody.create(mediaType,jsonObject.toString());
+        Request request = new Request.Builder()
+                .url(url+"/b2b/v1/paymentrequest")
+                .post(requestBody)
+                .addHeader("content-type","application/json")
+                .addHeader("authorization","Bearer "+authenticate(url))
+                .addHeader("cache-control","no-cache")
+                .build();
+        Response response = client.newCall(request).execute();
+        return response.body().toString();
     }
 
     @Override
-    public String STKPushSimulation(String businessShortCode, String password, String timestamp, String transactionType, String amount, String phoneNumber, String sender, String recipient, String callBackURL, String queueTimeOutUrl, String accountReference, String transactionDesc) throws IOException {
+    public String STKPushSimulation(String businessShortCode, String password, String timestamp, String transactionType, String amount, String phoneNumber, String sender, String recipient, String callBackURL, String queueTimeOutUrl, String accountReference, String transactionDesc,String url) throws IOException {
         return null;
     }
 
