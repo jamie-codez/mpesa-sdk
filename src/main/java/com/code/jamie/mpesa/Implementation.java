@@ -14,7 +14,6 @@ import java.util.Base64;
 public class Implementation implements Service{
     private String appKey;
     private String appSecret;
-//    private Service service;
 
     public Implementation(String appKey, String appSecret) {
         this.appKey = appKey;
@@ -40,10 +39,6 @@ public class Implementation implements Service{
     public Service getService() {
         return this;
     }
-
-//    public void setService(Service service) {
-//        this.service = service;
-//    }
 
     @Override
     public String authenticate(String url) throws IOException {
